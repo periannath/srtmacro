@@ -1,6 +1,6 @@
 var dsturl1 = 'https://etk.srail.kr/hpg/hra/01/selectScheduleList.do?pageId=TK0101010000'
 
-window.showModalDialog = window.showModalDialog || function(url, arg, opt) {
+window.showModalDialog = window.showModalDialog || function (url, arg, opt) {
 	window.open(url, arg, opt);
 };
 
@@ -58,7 +58,7 @@ function macrostop() {
 
 if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 
-	$(document).ready(function() {
+	$(document).ready(function () {
 
 		var coachSelected = JSON.parse(sessionStorage.getItem('coachSelected'));
 		var firstSelected = JSON.parse(sessionStorage.getItem('firstSelected'));
@@ -69,11 +69,11 @@ if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 		if (waitingSelected == null) waitingSelected = [];
 
 		if (sessionStorage.getItem('macro') == "true") {
-			$("div#search_top_tag.tal_c.mgt30").append('<a href="#" id="btnstop" style="margin-left:5px;display:inline-block;height:100%;vertical-align:middle;"><img src="' + chrome.runtime.getURL('images/btn_stop.png') + '"></a>');			
+			$("div#search_top_tag.tal_c.mgt30").append('<a href="#" id="btnstop" style="margin-left:5px;display:inline-block;height:100%;vertical-align:middle;"><img src="' + chrome.runtime.getURL('images/btn_stop.png') + '"></a>');
 		} else {
-			$("div#search_top_tag.tal_c.mgt30").append('<a href="#" id="btnstart" style="margin-left:5px;display:inline-block;height:100%;vertical-align:middle;"><img src="' + chrome.runtime.getURL('images/btn_start.png') + '"></a>');	
-		}	
-		
+			$("div#search_top_tag.tal_c.mgt30").append('<a href="#" id="btnstart" style="margin-left:5px;display:inline-block;height:100%;vertical-align:middle;"><img src="' + chrome.runtime.getURL('images/btn_start.png') + '"></a>');
+		}
+
 		var btnstop = document.getElementById("btnstop");
 		var btnstart = document.getElementById("btnstart");
 
@@ -85,12 +85,12 @@ if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 		}
 
 		$("<style>")
-    .prop("type", "text/css")
-    .html("\
+			.prop("type", "text/css")
+			.html("\
     .search-form form .button input, .search-form form .button a img{\
     	vertical-align: middle;\
     }")
-    .appendTo("body");
+			.appendTo("body");
 
 		// Inserts the macro button into the table.
 		if ($("#search-list").length != 0) {
@@ -103,19 +103,19 @@ if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 				if (coach.children().length > 0) {
 					coach.append($("<p class='p5'></p>"));
 					var checkbox = $("<label></label>").html('<input type="checkbox" name="checkbox" class="coachMacro" value="' + i + '"> 매크로');
-					checkbox.children('input').prop('checked', coachSelected.indexOf(i+"") > -1);
+					checkbox.children('input').prop('checked', coachSelected.indexOf(i + "") > -1);
 					coach.append(checkbox);
 				}
 				if (first.children().length > 0) {
 					first.append($("<p class='p5'></p>"));
 					var checkbox = $("<label></label>").html('<input type="checkbox" name="checkbox" class="firstMacro" value="' + i + '"> 매크로');
-					checkbox.children('input').prop('checked', firstSelected.indexOf(i+"") > -1);
+					checkbox.children('input').prop('checked', firstSelected.indexOf(i + "") > -1);
 					first.append(checkbox);
 				}
 				if (waiting.children().length > 0) {
 					waiting.append($("<p class='p5'></p>"));
 					var checkbox = $("<label></label>").html('<input type="checkbox" name="checkbox" class="waitingMacro" value="' + i + '"> 매크로');
-					checkbox.children('input').prop('checked', waitingSelected.indexOf(i+"") > -1);
+					checkbox.children('input').prop('checked', waitingSelected.indexOf(i + "") > -1);
 					waiting.append(checkbox);
 				}
 			}
@@ -142,7 +142,7 @@ if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 					var coach = $(columns[6]);
 					var waiting = $(columns[7]);
 
-					if (coachSelected.indexOf(i+"") > -1) {
+					if (coachSelected.indexOf(i + "") > -1) {
 						var coachSpecials = coach.children("a");
 						if (coachSpecials.length != 0) {
 							for (j = 0; j < coachSpecials.length; j++) {
@@ -157,7 +157,7 @@ if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 						}
 					}
 
-					if (firstSelected.indexOf(i+"") > -1) {
+					if (firstSelected.indexOf(i + "") > -1) {
 						var firstSpecials = first.children("a");
 						if (firstSpecials.length != 0) {
 							for (j = 0; j < firstSpecials.length; j++) {
@@ -172,7 +172,7 @@ if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 						}
 					}
 
-					if (waitingSelected.indexOf(i+"") > -1) {
+					if (waitingSelected.indexOf(i + "") > -1) {
 						var waitingSpecials = waiting.children("a");
 						if (waitingSpecials.length != 0) {
 							for (j = 0; j < waitingSpecials.length; j++) {
@@ -200,12 +200,12 @@ if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 					sessionStorage.removeItem('psgInfoPerPrnb3');
 					sessionStorage.removeItem('locSeatAttCd1');
 					sessionStorage.removeItem('rqSeatAttCd1');
-					chrome.extension.sendMessage({type: 'playSound'}, function(data) { });
+					chrome.extension.sendMessage({ type: 'playSound' }, function (data) { });
 					//특실 전용 코로나 안내 메세지 제거
 					document.querySelector('.ui-dialog-buttonset').querySelector('.ui-button').click();
 				} else {
-					setTimeout(function() {
-					location.reload();
+					setTimeout(function () {
+						location.reload();
 					}, 1000);
 				}
 			} else {
