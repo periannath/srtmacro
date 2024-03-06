@@ -4,6 +4,11 @@ window.showModalDialog = window.showModalDialog || function (url, arg, opt) {
 	window.open(url, arg, opt);
 };
 
+// Trigger click event on 조회하기 button
+function triggerTicketSearch() {
+	document.querySelector('#search_top_tag > input').click();
+}
+
 function macrostart() {
 	coachSelected = [].map.call(document.querySelectorAll('.coachMacro:checked'), function (select) {
 		return select.value;
@@ -215,7 +220,7 @@ if (document.URL.substring(0, dsturl1.length) == dsturl1) {
 					}, 1000);
 				}
 			} else {
-				history.go(-1);
+				triggerTicketSearch();
 			}
 		}
 	});
