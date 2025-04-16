@@ -2,40 +2,48 @@ var defaultBotToken = 'Set your telegram bot token';
 var defaultChatId = 'Set your telegram chat id';
 
 function save_options() {
-  localStorage['botToken'] = document.getElementById('bot_token').value;
-  localStorage['chatId'] = document.getElementById('chat_id').value;  
-  
-  var url = 'https://api.telegram.org/bot' + document.getElementById('bot_token').value + '/sendMessage?chat_id=' + document.getElementById('chat_id').value + '&text=' + encodeURI('Bot connected.');
-		
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.onreadystatechange=function() {
-	  if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-		  var response = xmlhttp.responseText; //if you need to do something with the returned value
-      }
-  }
-  xmlhttp.open('GET', url, true);
-  xmlhttp.send();
-  
-  var status = document.getElementById('status');
-    status.textContent = 'Options saved.';
-    setTimeout(function() {
-      status.textContent = '';
-    }, 750);
+  const botToken = document.getElementById('bot_token').value;
+  const chatId = document.getElementById('chat_id').value;
+
+  // Save to chrome.storage.local
+  chrome.storage.local.set({
+    'botToken': botToken,
+    'chatId': chatId
+  });
+
+  // Test the Telegram bot connection
+  var url = 'https://api.telegram.org/bot' + botToken + '/sendMessage?chat_id=' + chatId + '&text=' + encodeURI('Bot connected.');
+
+  fetch(url)
+    .then(response => {
+      const status = document.getElementById('status');
+      status.textContent = 'Options saved.';
+      setTimeout(() => {
+        status.textContent = '';
+      }, 750);
+    })
+    .catch(error => {
+      const status = document.getElementById('status');
+      status.textContent = 'Error: Could not connect to Telegram.';
+      console.error('Error:', error);
+      setTimeout(() => {
+        status.textContent = '';
+      }, 2000);
+    });
 }
 
 function restore_options() {
-  var botToken = localStorage['botToken'];
-  var chatId = localStorage['chatId'];
-  
-  if (botToken == undefined)
-	botToken = defaultBotToken;
-  
-  if (chatId == undefined)
-    chatId = defaultChatId;
-  
-  document.getElementById('bot_token').value = botToken;
-  document.getElementById('chat_id').value = chatId;
+  chrome.storage.local.get(['botToken', 'chatId'], (result) => {
+    let botToken = result.botToken;
+    let chatId = result.chatId;
+
+    if (!botToken) botToken = defaultBotToken;
+    if (!chatId) chatId = defaultChatId;
+
+    document.getElementById('bot_token').value = botToken;
+    document.getElementById('chat_id').value = chatId;
+  });
 }
+
 document.addEventListener('DOMContentLoaded', restore_options);
-document.getElementById('save').addEventListener('click',
-    save_options);
+document.getElementById('save').addEventListener('click', save_options);

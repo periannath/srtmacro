@@ -1,38 +1,59 @@
-function playSound() {
-	if (typeof(audio) != "undefined" && audio) {
-		audio.pause();
-		document.body.removeChild(audio);
-		audio = null;
-	}
-	audio = document.createElement('audio');
-	document.body.appendChild(audio);
-	audio.autoplay = true;
-	audio.src = chrome.extension.getURL('assets/tada.mp3');
-	audio.play();
+// Service worker for SRT Macro extension
+
+// Set up the offscreen document for audio playback
+async function setupOffscreenDocument() {
+  // Check if we already have an offscreen document open
+  const offscreenUrl = chrome.runtime.getURL('offscreen.html');
+  const existingContexts = await chrome.runtime.getContexts({
+    contextTypes: ['OFFSCREEN_DOCUMENT'],
+    documentUrls: [offscreenUrl]
+  }).catch(() => []);
+
+  if (existingContexts.length > 0) {
+    return;
+  }
+
+  // Create an offscreen document for audio playback
+  await chrome.offscreen.createDocument({
+    url: offscreenUrl,
+    reasons: ['AUDIO_PLAYBACK'],
+    justification: 'Playing notification sound when ticket is available'
+  }).catch(error => console.error(error));
 }
 
-function sendMessageToTelegram() {
-	var botToken = localStorage['botToken'];
-    var chatId = localStorage['chatId'];
-	var msg = encodeURI('Macro has been stopped. Please check your reservation status.');
-	if (botToken != undefined && chatId != undefined) {
-        var url = 'https://api.telegram.org/bot' + botToken + '/sendMessage?chat_id=' + chatId + '&text=' + msg;
-        
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange=function() {
-            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-                var response = xmlhttp.responseText; //if you need to do something with the returned value
-            }
-        }
-        xmlhttp.open('GET', url, true);
-        xmlhttp.send();
-    }
+// Play sound via the offscreen document
+async function playSound() {
+  await setupOffscreenDocument();
+  chrome.runtime.sendMessage({
+    type: 'play-sound'
+  });
 }
 
-chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
-    if (message && message.type == 'playSound') {
-		playSound();
-		sendMessageToTelegram();
-        sendResponse(true);
+// Send message to Telegram
+async function sendMessageToTelegram() {
+  // Get bot token and chat ID from storage
+  const result = await chrome.storage.local.get(['botToken', 'chatId']);
+  const botToken = result.botToken;
+  const chatId = result.chatId;
+
+  if (botToken && chatId) {
+    const msg = encodeURI('Macro has been stopped. Please check your reservation status.');
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${msg}`;
+
+    try {
+      await fetch(url);
+    } catch (error) {
+      console.error('Error sending Telegram message:', error);
     }
+  }
+}
+
+// Listen for messages from content script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message && message.type === 'playSound') {
+    playSound();
+    sendMessageToTelegram();
+    sendResponse(true);
+    return true; // Required for async sendResponse
+  }
 });
