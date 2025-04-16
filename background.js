@@ -48,6 +48,17 @@ async function sendMessageToTelegram() {
   }
 }
 
+// Show Chrome notification
+function showNotification(title, message) {
+  chrome.notifications.create({
+    type: 'basic',
+    iconUrl: 'images/icon128.png',
+    title: title || 'SRT Macro',
+    message: message || 'Notification from SRT Macro',
+    priority: 2
+  });
+}
+
 // Listen for messages from content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message && message.type === 'playSound') {
@@ -55,5 +66,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendMessageToTelegram();
     sendResponse(true);
     return true; // Required for async sendResponse
+  }
+
+  // Handle notification requests from alert-override.js
+  if (message && message.type === 'showNotification') {
+    showNotification(message.title, message.message);
+    sendResponse(true);
+    return true;
   }
 });

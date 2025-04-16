@@ -1,3 +1,42 @@
+/**
+ * SRT Macro Content Script
+ * Enhances SRT website with automated ticket reservation functionality
+ */
+
+/**
+ * Injects a script into the page context
+ * @param {string} scriptPath - Path to the script file
+ */
+function injectScript(scriptPath) {
+    const script = document.createElement('script');
+    script.src = chrome.runtime.getURL(scriptPath);
+    script.onload = function() {
+        this.remove(); // Clean up by removing the script element after loading
+    };
+    // Add the script to the page as early as possible
+    (document.head || document.documentElement).appendChild(script);
+}
+
+// Listen for messages from the injected script
+window.addEventListener('message', function(event) {
+    // Only accept messages from our injected script
+    if (event.source !== window || !event.data.source || event.data.source !== 'srt-macro-alert-override') {
+        return;
+    }
+
+    // Forward notifications to the background script
+    if (event.data.type === 'showNotification') {
+        chrome.runtime.sendMessage({
+            type: 'showNotification',
+            title: event.data.title,
+            message: event.data.message
+        });
+    }
+}, false);
+
+// Inject alert override script
+injectScript('alert-override.js')
+
 var dsturl1 = 'https://etk.srail.kr/hpg/hra/01/selectScheduleList.do?pageId=TK0101010000'
 
 window.showModalDialog = window.showModalDialog || function (url, arg, opt) {
@@ -165,10 +204,13 @@ function setupUI() {
 }
 
 function isReservationButton(element) {
-	const name = $(element).attr('class');
-	const spans = $(element).children('span');
-	const text = spans.length > 0 ? $(spans[0]).text() : '';
-	return name === 'btn_small btn_burgundy_dark val_m wx90' && text === '예약하기';
+    const name = $(element).attr('class');
+    const spans = $(element).children('span');
+    const text = spans.length > 0 ? $(spans[0]).text() : '';
+
+    // Check for both reservation button classes and valid button texts
+    return name === 'btn_small btn_burgundy_dark val_m wx90' &&
+           (text === '예약하기' || text === '예약 하기' || text === '신청하기');
 }
 
 function tryReservationForType(cell, rowIndex, selectedRows) {
